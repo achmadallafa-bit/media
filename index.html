@@ -3,170 +3,208 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Central Tendency Balancer + Fitur Simpan File</title>
+  <title>Simulasi & Kuis Pemusatan Data - Silinder Air</title>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
-    .card { background: white; max-width: 700px; margin: auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    h2 { color: #2c3e50; margin-top: 0; }
-    
-    /* Area Timbangan */
-    .scale-container { position: relative; height: 100px; border-bottom: 4px solid #34495e; margin: 40px 0 20px 0; background: #fafafa; border-radius: 8px 8px 0 0; }
-    .dots-area { display: flex; justify-content: space-between; align-items: flex-end; height: 100%; padding: 0 10px; }
-    .dot-column { display: flex; flex-direction: column-reverse; align-items: center; width: 8%; }
-    .dot { width: 18px; height: 18px; background-color: #3498db; border-radius: 50%; margin: 2px 0; }
-    .val-label { font-size: 11px; font-weight: bold; margin-top: 5px; color: #7f8c8d; }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body { background-color: #f8fafc; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+    .container { background: white; width: 100%; max-width: 850px; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; }
 
-    /* Fulcrum / Segitiga Tumpuan */
-    .fulcrum { position: absolute; bottom: -20px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 20px solid #e74c3c; transform: translateX(-50%); transition: left 0.3s ease; }
-    .mean-tag { position: absolute; bottom: -45px; transform: translateX(-50%); background: #e74c3c; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; transition: left 0.3s ease; }
+    /* Area Grafik Silinder */
+    .chart-area { position: relative; height: 320px; display: flex; align-items: flex-end; justify-content: space-around; padding: 0 40px 40px 60px; margin-top: 20px; }
+    .y-axis { position: absolute; left: 10px; top: 0; bottom: 40px; display: flex; flex-direction: column; justify-content: space-between; color: #64748b; font-size: 13px; font-weight: 500; }
+    .grid-lines { position: absolute; left: 50px; right: 20px; top: 0; bottom: 40px; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
+    .grid-line { border-bottom: 1px dashed #e2e8f0; width: 100%; }
 
-    /* Panel Kontrol & Tombol */
-    .btn-group { margin-top: 50px; display: flex; gap: 8px; flex-wrap: wrap; }
-    button { padding: 8px 14px; border: none; border-radius: 6px; font-size: 0.9em; cursor: pointer; transition: 0.2s; }
-    .btn-add { background: #3498db; color: white; }
-    .btn-add:hover { background: #2980b9; }
-    .btn-reset { background: #95a5a6; color: white; }
-    .btn-save { background: #2ecc71; color: white; font-weight: bold; }
-    .btn-save:hover { background: #27ae60; }
-    
-    .stats-box { background: #eef2f7; padding: 12px; border-radius: 8px; margin-top: 15px; display: flex; justify-content: space-around; font-weight: bold; }
-    .export-section { margin-top: 20px; padding-top: 15px; border-top: 2px dashed #ecf0f1; }
+    /* Silinder */
+    .cylinder-wrapper { display: flex; flex-direction: column; align-items: center; z-index: 2; }
+    .cylinder { width: 65px; height: 240px; border: 3px solid #15803d; border-radius: 6px; background: #f1f5f9; position: relative; overflow: hidden; box-shadow: 0 0 10px rgba(34, 197, 94, 0.2); }
+    .water { position: absolute; bottom: 0; width: 100%; background: #3b82f6; transition: height 0.1s ease-out; }
+    .label-title { font-weight: bold; margin-top: 10px; color: #1e293b; font-size: 16px; }
+    .label-value { color: #64748b; font-size: 14px; margin-top: 2px; }
+
+    /* Indikator Line */
+    .line-mean { position: absolute; left: 50px; right: 20px; height: 2px; border-top: 2px dashed #dc2626; z-index: 10; pointer-events: none; transition: bottom 0.1s ease-out; }
+    .line-median { position: absolute; left: 50px; right: 20px; height: 2px; background: #7c3aed; z-index: 9; pointer-events: none; transition: bottom 0.1s ease-out; }
+    .label-mean { position: absolute; left: 0; top: -20px; color: #dc2626; font-weight: bold; font-size: 13px; }
+    .label-median { position: absolute; right: 0; top: -20px; color: #7c3aed; font-weight: bold; font-size: 13px; }
+
+    /* Ringkasan Statistik */
+    .stats-container { display: flex; justify-content: space-around; border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 10px; text-align: center; }
+    .stat-item { flex: 1; position: relative; }
+    .stat-item:not(:last-child)::after { content: ""; position: absolute; right: 0; top: 15%; height: 70%; width: 1px; background: #cbd5e1; }
+    .stat-label { color: #64748b; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+    .stat-val { font-size: 20px; font-weight: 800; color: #0f172a; margin-top: 4px; }
+
+    /* Slider Pengontrol */
+    .controls-grid { display: grid; grid-template-columns: repeat( auto-fit, minmax(230px, 1fr) ); gap: 15px; margin-top: 30px; background: #f8fafc; padding: 20px; border-radius: 12px; }
+    .control-group { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .control-group label { font-size: 13px; font-weight: 600; color: #475569; width: 80px; }
+    .control-group input[type=range] { flex: 1; cursor: pointer; accent-color: #475569; }
+    .val-badge { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: bold; color: #334155; min-width: 45px; text-align: center; }
+
+    /* Kuis Section */
+    .quiz-card { background: white; width: 100%; max-width: 850px; padding: 25px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .quiz-opt { width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; text-align: left; cursor: pointer; font-size: 0.95em; transition: 0.2s; margin-bottom: 8px; font-weight: 500; }
+    .quiz-opt:hover { background: #e2e8f0; }
+    .feedback { margin-top: 15px; padding: 12px; border-radius: 8px; font-weight: bold; display: none; }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>Central Tendency Balancer Simulator</h2>
-  <p>Tambah bobot angka pada papan dan perhatikan perubahan titik tumpu keseimbangan <b>Mean</b>.</p>
+<div class="container">
+  <h2 style="margin: 0; color: #1e293b; text-align: center;">Simulasi Pemusatan Data</h2>
+  <p style="text-align: center; color: #64748b; margin-bottom: 20px;">Ubah volume air pada silinder dan perhatikan pergeseran garis Mean serta Median.</p>
 
-  <!-- Visualisasi Timbangan -->
-  <div class="scale-container">
-    <div class="dots-area" id="dotsArea"></div>
-    <div class="fulcrum" id="fulcrum"></div>
-    <div class="mean-tag" id="meanTag">Mean</div>
-  </div>
-
-  <!-- Ringkasan Statistik -->
-  <div class="stats-box">
-    <div>Mean (Rata-rata): <span id="statMean" style="color:#e74c3c;">0</span></div>
-    <div>Median (Nilai Tengah): <span id="statMedian" style="color:#2ecc71;">0</span></div>
-    <div>Total Data: <span id="statCount">0</span></div>
-  </div>
-
-  <!-- Aksi Tambah Data -->
-  <div class="btn-group">
-    <button class="btn-add" onclick="addData(2)">+ Data [2]</button>
-    <button class="btn-add" onclick="addData(5)">+ Data [5]</button>
-    <button class="btn-add" onclick="addData(8)">+ Data [8]</button>
-    <button class="btn-reset" onclick="resetData()">Reset</button>
-  </div>
-
-  <!-- Fitur Simpan File -->
-  <div class="export-section">
-    <h3>💾 Simpan & Ekspor Hasil Simulasi</h3>
-    <div class="btn-group">
-      <button class="btn-save" onclick="downloadJSON()">Simpan Sesi (.JSON)</button>
-      <button class="btn-save" style="background:#8e44ad;" onclick="downloadTXT()">Unduh Laporan (.TXT)</button>
+  <!-- Area Visualisator -->
+  <div class="chart-area">
+    <div class="y-axis">
+      <span>100</span><span>75</span><span>50</span><span>25</span><span>0</span>
     </div>
+    
+    <div class="grid-lines">
+      <div class="grid-line"></div><div class="grid-line"></div>
+      <div class="grid-line"></div><div class="grid-line"></div>
+      <div class="grid-line"></div>
+    </div>
+
+    <div class="line-mean" id="lineMean">
+      <span class="label-mean" id="textMeanTag">Mean: 50.0 mL</span>
+    </div>
+    <div class="line-median" id="lineMedian">
+      <span class="label-median" id="textMedianTag">Median: 50 mL</span>
+    </div>
+
+    <div class="cylinder-wrapper">
+      <div class="cylinder"><div class="water" id="waterA"></div></div>
+      <div class="label-title">A</div>
+      <div class="label-value" id="valAText">50 mL</div>
+    </div>
+    <div class="cylinder-wrapper">
+      <div class="cylinder"><div class="water" id="waterB"></div></div>
+      <div class="label-title">B</div>
+      <div class="label-value" id="valBText">50 mL</div>
+    </div>
+    <div class="cylinder-wrapper">
+      <div class="cylinder"><div class="water" id="waterC"></div></div>
+      <div class="label-title">C</div>
+      <div class="label-value" id="valCText">50 mL</div>
+    </div>
+    <div class="cylinder-wrapper">
+      <div class="cylinder"><div class="water" id="waterD"></div></div>
+      <div class="label-title">D</div>
+      <div class="label-value" id="valDText">50 mL</div>
+    </div>
+    <div class="cylinder-wrapper">
+      <div class="cylinder"><div class="water" id="waterE"></div></div>
+      <div class="label-title">E</div>
+      <div class="label-value" id="valEText">50 mL</div>
+    </div>
+  </div>
+
+  <!-- Statistik Ringkasan -->
+  <div class="stats-container">
+    <div class="stat-item"><div class="stat-label">SUM</div><div class="stat-val" id="statSum">250 mL</div></div>
+    <div class="stat-item"><div class="stat-label">MEAN</div><div class="stat-val" id="statMean">50.0 mL</div></div>
+    <div class="stat-item"><div class="stat-label">MEDIAN</div><div class="stat-val" id="statMedian">50 mL</div></div>
+    <div class="stat-item"><div class="stat-label">MODE</div><div class="stat-val" id="statMode">50 mL</div></div>
+  </div>
+
+  <!-- Pengontrol Slider -->
+  <div class="controls-grid">
+    <div class="control-group"><label>Cylinder A</label><input type="range" id="sliderA" min="0" max="100" value="50" oninput="updateSimulation()"><div class="val-badge" id="badgeA">50</div></div>
+    <div class="control-group"><label>Cylinder B</label><input type="range" id="sliderB" min="0" max="100" value="50" oninput="updateSimulation()"><div class="val-badge" id="badgeB">50</div></div>
+    <div class="control-group"><label>Cylinder C</label><input type="range" id="sliderC" min="0" max="100" value="50" oninput="updateSimulation()"><div class="val-badge" id="badgeC">50</div></div>
+    <div class="control-group"><label>Cylinder D</label><input type="range" id="sliderD" min="0" max="100" value="50" oninput="updateSimulation()"><div class="val-badge" id="badgeD">50</div></div>
+    <div class="control-group"><label>Cylinder E</label><input type="range" id="sliderE" min="0" max="100" value="50" oninput="updateSimulation()"><div class="val-badge" id="badgeE">50</div></div>
   </div>
 </div>
 
+<!-- KUIS INTERAKTIF -->
+<div class="quiz-card">
+  <h3 style="color: #1e293b; margin-top:0;">📝 Kuis Cepat: Evaluasi Pemahaman</h3>
+  <p id="quizQuestion" style="font-size: 1.05em; font-weight: 600; color: #334155;">
+    Soal: Jika seluruh air pada kelima silinder digabungkan dan menghasilkan SUM = 350 mL, berapakah nilai Mean (rata-rata) air pada tiap silinder?
+  </p>
+
+  <div id="quizOptions">
+    <button class="quiz-opt" onclick="checkAnswer(this, false)">A. 50 mL</button>
+    <button class="quiz-opt" onclick="checkAnswer(this, true)">B. 70 mL</button>
+    <button class="quiz-opt" onclick="checkAnswer(this, false)">C. 75 mL</button>
+    <button class="quiz-opt" onclick="checkAnswer(this, false)">D. 350 mL</button>
+  </div>
+
+  <div id="quizFeedback" class="feedback"></div>
+</div>
+
 <script>
-  let dataset = [2, 4, 4, 6, 8]; // Data default
+  function updateSimulation() {
+    const valA = parseFloat(document.getElementById('sliderA').value);
+    const valB = parseFloat(document.getElementById('sliderB').value);
+    const valC = parseFloat(document.getElementById('sliderC').value);
+    const valD = parseFloat(document.getElementById('sliderD').value);
+    const valE = parseFloat(document.getElementById('sliderE').value);
 
-  function renderScale() {
-    const dotsArea = document.getElementById('dotsArea');
-    dotsArea.innerHTML = '';
+    const values = [valA, valB, valC, valD, valE];
+    const keys = ['A', 'B', 'C', 'D', 'E'];
 
-    // Render kolom 1 sampai 10
-    for (let i = 1; i <= 10; i++) {
-      const col = document.createElement('div');
-      col.className = 'dot-column';
-      
-      const count = dataset.filter(x => x === i).length;
-      for (let j = 0; j < count; j++) {
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        col.appendChild(dot);
+    keys.forEach((key, index) => {
+      const val = values[index];
+      document.getElementById(`water${key}`).style.height = `${val}%`;
+      document.getElementById(`val${key}Text`).innerText = `${val} mL`;
+      document.getElementById(`badge${key}`).innerText = val;
+    });
+
+    const sum = values.reduce((a, b) => a + b, 0);
+    const mean = sum / values.length;
+
+    const sorted = [...values].sort((a, b) => a - b);
+    const median = sorted[2];
+
+    const freq = {};
+    let maxFreq = 0;
+    let mode = [];
+    values.forEach(v => {
+      freq[v] = (freq[v] || 0) + 1;
+      if (freq[v] > maxFreq) maxFreq = freq[v];
+    });
+    
+    if (maxFreq > 1) {
+      for (let k in freq) {
+        if (freq[k] === maxFreq) mode.push(k);
       }
-
-      const label = document.createElement('div');
-      label.className = 'val-label';
-      label.innerText = i;
-      col.appendChild(label);
-
-      dotsArea.appendChild(col);
     }
 
-    // Kalkulasi Mean & Median
-    const sum = dataset.reduce((a, b) => a + b, 0);
-    const mean = dataset.length ? (sum / dataset.length) : 0;
+    const meanBottom = 40 + (mean * 2.4);
+    const medianBottom = 40 + (median * 2.4);
+
+    document.getElementById('lineMean').style.bottom = `${meanBottom}px`;
+    document.getElementById('lineMedian').style.bottom = `${medianBottom}px`;
+
+    document.getElementById('textMeanTag').innerText = `Mean: ${mean.toFixed(1)} mL`;
+    document.getElementById('textMedianTag').innerText = `Median: ${median} mL`;
+
+    document.getElementById('statSum').innerText = `${sum} mL`;
+    document.getElementById('statMean').innerText = `${mean.toFixed(1)} mL`;
+    document.getElementById('statMedian').innerText = `${median} mL`;
+    document.getElementById('statMode').innerText = mode.length > 0 ? `${mode.join(', ')} mL` : 'Tidak ada';
+  }
+
+  function checkAnswer(btn, isCorrect) {
+    const feedback = document.getElementById('quizFeedback');
+    feedback.style.display = 'block';
     
-    const sorted = [...dataset].sort((a, b) => a - b);
-    const mid = Math.floor(sorted.length / 2);
-    const median = sorted.length ? (sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2) : 0;
-
-    // Posisi Titik Tumpu Segitiga (%)
-    const percentPos = ((mean - 1) / (10 - 1)) * 100;
-    const clampedPos = Math.max(0, Math.min(100, percentPos));
-
-    document.getElementById('fulcrum').style.left = `${clampedPos}%`;
-    document.getElementById('meanTag').style.left = `${clampedPos}%`;
-    document.getElementById('statMean').innerText = mean.toFixed(2);
-    document.getElementById('statMedian').innerText = median.toFixed(2);
-    document.getElementById('statCount').innerText = dataset.length;
+    if (isCorrect) {
+      feedback.style.background = '#dcfce7';
+      feedback.style.color = '#15803d';
+      feedback.innerText = '✅ Tepat sekali! Mean dihitung dari Total Air (350 mL) dibagi 5 Silinder = 70 mL.';
+    } else {
+      feedback.style.background = '#fee2e2';
+      feedback.style.color = '#b91c1c';
+      feedback.innerText = '❌ Jawaban belum tepat. Ingat rumus Mean = Total Air (SUM) / Banyak Silinder.';
+    }
   }
 
-  function addData(val) {
-    dataset.push(val);
-    renderScale();
-  }
-
-  function resetData() {
-    dataset = [];
-    renderScale();
-  }
-
-  // FUNSI EKSPOR 1: Download JSON (Untuk simpan State/Sesi)
-  function downloadJSON() {
-    const dataObj = {
-      timestamp: new Date().toISOString(),
-      materi: "Pemusatan Data (Central Tendency)",
-      dataset: dataset,
-      mean: document.getElementById('statMean').innerText,
-      median: document.getElementById('statMedian').innerText
-    };
-    
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataObj, null, 2));
-    const dlAnchor = document.createElement('a');
-    dlAnchor.setAttribute("href", dataStr);
-    dlAnchor.setAttribute("download", "sesi_balancer.json");
-    document.body.appendChild(dlAnchor);
-    dlAnchor.click();
-    dlAnchor.remove();
-  }
-
-  // FUNGSI EKSPOR 2: Download TXT (Untuk Laporan Tugas Siswa)
-  function downloadTXT() {
-    const textContent = `==== LAPORAN HASIL SIMULASI PEMUSATAN DATA ====
-Tanggal : ${new Date().toLocaleString()}
-Data    : [ ${dataset.join(', ')} ]
-----------------------------------------------
-Rata-rata (Mean)    : ${document.getElementById('statMean').innerText}
-Nilai Tengah (Median): ${document.getElementById('statMedian').innerText}
-Total Sampel Data   : ${dataset.length} Item
-----------------------------------------------
-Di generate dari Media Pembelajaran Interaktif Balancer.`;
-
-    const blob = new Blob([textContent], { type: "text/plain;charset=utf-8" });
-    const dlAnchor = document.createElement('a');
-    dlAnchor.href = URL.createObjectURL(blob);
-    dlAnchor.download = "Laporan_Hasil_Simulasi.txt";
-    dlAnchor.click();
-  }
-
-  // Inisialisasi awal
-  renderScale();
+  updateSimulation();
 </script>
 
 </body>
