@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Central Tendency Balancer + Fitur Simpan File</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
+    .card { background: white; max-width: 700px; margin: auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    h2 { color: #2c3e50; margin-top: 0; }
+    
+    /* Area Timbangan */
+    .scale-container { position: relative; height: 100px; border-bottom: 4px solid #34495e; margin: 40px 0 20px 0; background: #fafafa; border-radius: 8px 8px 0 0; }
+    .dots-area { display: flex; justify-content: space-between; align-items: flex-end; height: 100%; padding: 0 10px; }
+    .dot-column { display: flex; flex-direction: column-reverse; align-items: center; width: 8%; }
+    .dot { width: 18px; height: 18px; background-color: #3498db; border-radius: 50%; margin: 2px 0; }
+    .val-label { font-size: 11px; font-weight: bold; margin-top: 5px; color: #7f8c8d; }
+
+    /* Fulcrum / Segitiga Tumpuan */
+    .fulcrum { position: absolute; bottom: -20px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 20px solid #e74c3c; transform: translateX(-50%); transition: left 0.3s ease; }
+    .mean-tag { position: absolute; bottom: -45px; transform: translateX(-50%); background: #e74c3c; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; transition: left 0.3s ease; }
+
+    /* Panel Kontrol & Tombol */
+    .btn-group { margin-top: 50px; display: flex; gap: 8px; flex-wrap: wrap; }
+    button { padding: 8px 14px; border: none; border-radius: 6px; font-size: 0.9em; cursor: pointer; transition: 0.2s; }
+    .btn-add { background: #3498db; color: white; }
+    .btn-add:hover { background: #2980b9; }
+    .btn-reset { background: #95a5a6; color: white; }
+    .btn-save { background: #2ecc71; color: white; font-weight: bold; }
+    .btn-save:hover { background: #27ae60; }
+    
+    .stats-box { background: #eef2f7; padding: 12px; border-radius: 8px; margin-top: 15px; display: flex; justify-content: space-around; font-weight: bold; }
+    .export-section { margin-top: 20px; padding-top: 15px; border-top: 2px dashed #ecf0f1; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Central Tendency Balancer Simulator</h2>
+  <p>Tambah bobot angka pada papan dan perhatikan perubahan titik tumpu keseimbangan <b>Mean</b>.</p>
+
+  <!-- Visualisasi Timbangan -->
+  <div class="scale-container">
+    <div class="dots-area" id="dotsArea"></div>
+    <div class="fulcrum" id="fulcrum"></div>
+    <div class="mean-tag" id="meanTag">Mean</div>
+  </div>
+
+  <!-- Ringkasan Statistik -->
+  <div class="stats-box">
+    <div>Mean (Rata-rata): <span id="statMean" style="color:#e74c3c;">0</span></div>
+    <div>Median (Nilai Tengah): <span id="statMedian" style="color:#2ecc71;">0</span></div>
+    <div>Total Data: <span id="statCount">0</span></div>
+  </div>
+
+  <!-- Aksi Tambah Data -->
+  <div class="btn-group">
+    <button class="btn-add" onclick="addData(2)">+ Data [2]</button>
+    <button class="btn-add" onclick="addData(5)">+ Data [5]</button>
+    <button class="btn-add" onclick="addData(8)">+ Data [8]</button>
+    <button class="btn-reset" onclick="resetData()">Reset</button>
+  </div>
+
+  <!-- Fitur Simpan File -->
+  <div class="export-section">
+    <h3>💾 Simpan & Ekspor Hasil Simulasi</h3>
+    <div class="btn-group">
+      <button class="btn-save" onclick="downloadJSON()">Simpan Sesi (.JSON)</button>
+      <button class="btn-save" style="background:#8e44ad;" onclick="downloadTXT()">Unduh Laporan (.TXT)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let dataset = [2, 4, 4, 6, 8]; // Data default
+
+  function renderScale() {
+    const dotsArea = document.getElementById('dotsArea');
+    dotsArea.innerHTML = '';
+
+    // Render kolom 1 sampai 10
+    for (let i = 1; i <= 10; i++) {
+      const col = document.createElement('div');
+      col.className = 'dot-column';
+      
+      const count = dataset.filter(x => x === i).length;
+      for (let j = 0; j < count; j++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        col.appendChild(dot);
+      }
+
+      const label = document.createElement('div');
+      label.className = 'val-label';
+      label.innerText = i;
+      col.appendChild(label);
+
+      dotsArea.appendChild(col);
+    }
+
+    // Kalkulasi Mean & Median
+    const sum = dataset.reduce((a, b) => a + b, 0);
+    const mean = dataset.length ? (sum / dataset.length) : 0;
+    
+    const sorted = [...dataset].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    const median = sorted.length ? (sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2) : 0;
+
+    // Posisi Titik Tumpu Segitiga (%)
+    const percentPos = ((mean - 1) / (10 - 1)) * 100;
+    const clampedPos = Math.max(0, Math.min(100, percentPos));
+
+    document.getElementById('fulcrum').style.left = `${clampedPos}%`;
+    document.getElementById('meanTag').style.left = `${clampedPos}%`;
+    document.getElementById('statMean').innerText = mean.toFixed(2);
+    document.getElementById('statMedian').innerText = median.toFixed(2);
+    document.getElementById('statCount').innerText = dataset.length;
+  }
+
+  function addData(val) {
+    dataset.push(val);
+    renderScale();
+  }
+
+  function resetData() {
+    dataset = [];
+    renderScale();
+  }
+
+  // FUNSI EKSPOR 1: Download JSON (Untuk simpan State/Sesi)
+  function downloadJSON() {
+    const dataObj = {
+      timestamp: new Date().toISOString(),
+      materi: "Pemusatan Data (Central Tendency)",
+      dataset: dataset,
+      mean: document.getElementById('statMean').innerText,
+      median: document.getElementById('statMedian').innerText
+    };
+    
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataObj, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", "sesi_balancer.json");
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+  }
+
+  // FUNGSI EKSPOR 2: Download TXT (Untuk Laporan Tugas Siswa)
+  function downloadTXT() {
+    const textContent = `==== LAPORAN HASIL SIMULASI PEMUSATAN DATA ====
+Tanggal : ${new Date().toLocaleString()}
+Data    : [ ${dataset.join(', ')} ]
+----------------------------------------------
+Rata-rata (Mean)    : ${document.getElementById('statMean').innerText}
+Nilai Tengah (Median): ${document.getElementById('statMedian').innerText}
+Total Sampel Data   : ${dataset.length} Item
+----------------------------------------------
+Di generate dari Media Pembelajaran Interaktif Balancer.`;
+
+    const blob = new Blob([textContent], { type: "text/plain;charset=utf-8" });
+    const dlAnchor = document.createElement('a');
+    dlAnchor.href = URL.createObjectURL(blob);
+    dlAnchor.download = "Laporan_Hasil_Simulasi.txt";
+    dlAnchor.click();
+  }
+
+  // Inisialisasi awal
+  renderScale();
+</script>
+
+</body>
+</html>
