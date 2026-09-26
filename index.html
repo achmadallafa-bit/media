@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Petualangan Matematika</title>
+<style>
+:root{
+  --bg:#f4f7fb; --card:#ffffff; --text:#1e2433; --muted:#6b7280;
+  --primary:#4f46e5; --primary-d:#4338ca; --good:#16a34a; --bad:#dc2626;
+  --accent:#f59e0b; --cellA:#c7d2fe; --cellB:#fde68a; --cellAB:#818cf8;
+  --border:#e5e7eb;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1220; --card:#1a1f35; --text:#e8eaf3; --muted:#9aa2bd;
+    --border:#2a3050; --cellA:#31366b; --cellB:#5b4b17; --cellAB:#6d5ff2;
+  }
+}
+:root[data-theme="dark"]{ --bg:#0f1220; --card:#1a1f35; --text:#e8eaf3; --muted:#9aa2bd; --border:#2a3050; --cellA:#31366b; --cellB:#5b4b17; --cellAB:#6d5ff2; }
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0; background:transparent; color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; display:flex; justify-content:center; padding:20px 14px;}
+.wrap{width:100%; max-width:560px; position:relative; z-index:1;}
+
+.bg-scene{position:fixed; inset:0; z-index:-1; overflow:hidden;
+  background:linear-gradient(to bottom, #8ec9f0 0%, #cfe9fb 55%, #eaf7e8 100%);}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .bg-scene{
+  background:linear-gradient(to bottom, #0b1030 0%, #151b3d 55%, #0f1a12 100%);} }
+:root[data-theme="dark"] .bg-scene{background:linear-gradient(to bottom, #0b1030 0%, #151b3d 55%, #0f1a12 100%);}
+
+.sun{position:absolute; top:40px; right:50px; width:64px; height:64px; border-radius:50%;
+  background:#ffd76a; box-shadow:0 0 40px 12px rgba(255,215,106,.55);}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .sun{
+  background:#dfe3f5; box-shadow:0 0 24px 6px rgba(223,227,245,.4);} }
+:root[data-theme="dark"] .sun{background:#dfe3f5; box-shadow:0 0 24px 6px rgba(223,227,245,.4);}
+
+.cloud{position:absolute; width:90px; height:28px; background:#fff; border-radius:40px; opacity:.85;}
+.cloud::before,.cloud::after{content:''; position:absolute; background:inherit; border-radius:50%;}
+.cloud::before{width:46px; height:46px; top:-18px; left:10px;}
+.cloud::after{width:36px; height:36px; top:-12px; left:48px;}
+.c1{top:8%; animation:drift 55s linear infinite;}
+.c2{top:18%; animation:drift 70s linear infinite; animation-delay:-20s; transform:scale(.8);}
+.c3{top:4%; animation:drift 85s linear infinite; animation-delay:-45s; transform:scale(1.15);}
+@keyframes drift{ from{transform:translateX(-160px);} to{transform:translateX(110vw);} }
+
+.hill{position:absolute; left:-10%; width:120%; height:130px; border-radius:50% 50% 0 0/100% 100% 0 0;}
+.hill-back{background:#a9dba0; bottom:-6px; opacity:.75;}
+.hill-front{background:#8fcf85; bottom:-28px;}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .hill-back{background:#1c3a24; opacity:.8;} :root:not([data-theme="light"]) .hill-front{background:#122b19;} }
+:root[data-theme="dark"] .hill-back{background:#1c3a24; opacity:.8;}
+:root[data-theme="dark"] .hill-front{background:#122b19;}
+
+.leaf{position:absolute; top:-30px; font-size:18px; opacity:0; animation:leafFall linear infinite;}
+@keyframes leafFall{0%{transform:translate(0,0) rotate(0deg); opacity:0;} 8%{opacity:.9;} 100%{transform:translate(40px,112vh) rotate(340deg); opacity:0;}}
+.l1{left:8%; animation-duration:15s;} .l2{left:28%; animation-duration:19s; animation-delay:4s;}
+.l3{left:52%; animation-duration:17s; animation-delay:9s;} .l4{left:74%; animation-duration:21s; animation-delay:2s;}
+.l5{left:90%; animation-duration:16s; animation-delay:7s;}
+@media (prefers-reduced-motion:reduce){ .cloud,.leaf{animation:none; display:none;} }
+h1{font-size:1.35rem; text-align:center; margin:4px 0 2px;}
+.sub{text-align:center; color:var(--muted); font-size:.9rem; margin-bottom:18px;}
+.card{background:var(--card); border:1px solid var(--border); border-radius:18px; padding:20px; box-shadow:0 4px 18px rgba(0,0,0,.06); margin-bottom:14px; position:relative; overflow:hidden;}
+@keyframes pop{0%{transform:scale(.6);opacity:0;}60%{transform:scale(1.18);opacity:1;}100%{transform:scale(1);}}
+@keyframes shakeCard{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(8px);}60%{transform:translateX(-6px);}80%{transform:translateX(6px);}}
+@keyframes fadeSlide{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+@keyframes floatUp{from{opacity:1; transform:translate(-50%,0);} to{opacity:0; transform:translate(-50%,-34px);}}
+@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg); opacity:1;} 100%{transform:translateY(220px) rotate(380deg); opacity:0;}}
+@keyframes heartPop{0%{transform:scale(1);} 40%{transform:scale(1.4);} 100%{transform:scale(1);}}
+.card.shake{animation:shakeCard .4s ease;}
+.q-anim{animation:fadeSlide .35s ease;}
+.feedback.good{animation:pop .4s ease;}
+.feedback.bad{animation:pop .3s ease;}
+.hearts.pulse{animation:heartPop .35s ease;}
+.plus-float{position:absolute; font-weight:700; color:var(--good); font-size:1rem; left:50%; animation:floatUp .8s ease forwards; pointer-events:none;}
+.confetti-piece{position:absolute; font-size:16px; top:-10px; animation:confettiFall 1.1s ease forwards; pointer-events:none;}
+.levels{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.lvl-btn{border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:14px; padding:14px 10px; cursor:pointer; text-align:left;}
+.lvl-btn:active{transform:scale(.97);}
+.lvl-btn b{display:block; font-size:.9rem; margin-bottom:2px;}
+.lvl-btn span{font-size:.74rem; color:var(--muted);}
+.mix-btn{grid-column:1/-1; background:var(--primary); color:#fff; border:none; border-radius:14px; padding:16px; text-align:center; font-weight:600; cursor:pointer;}
+.hud{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:.85rem; color:var(--muted);}
+.hearts{color:var(--bad); letter-spacing:2px;}
+.progress{height:8px; background:var(--border); border-radius:6px; overflow:hidden; margin-bottom:16px;}
+.progress-fill{height:100%; background:var(--primary); transition:width .3s;}
+.question{font-size:1.08rem; font-weight:600; text-align:center; margin-bottom:14px;}
+.btn{transition:transform .1s;} .btn:active{transform:scale(.96);}
+.visual{display:flex; flex-direction:column; align-items:stretch; gap:8px; margin:14px 0; overflow-x:auto;}
+.grid-model{display:grid; gap:2px; padding:4px; background:var(--border); border-radius:8px; margin:0 auto;}
+.cell{width:20px; height:20px; background:var(--card); border-radius:2px;}
+.cell.a{background:var(--cellA);} .cell.b{background:var(--cellB);} .cell.ab{background:var(--cellAB);}
+.bar-row{display:flex; gap:6px; flex-wrap:wrap; justify-content:center;}
+.bar{display:flex; border:2px solid var(--text); border-radius:6px; overflow:hidden;}
+.seg{width:22px; height:28px; border-right:2px solid var(--text); opacity:.9;}
+.seg:last-child{border-right:none;} .seg.on{background:var(--accent); opacity:1;}
+.steps{font-size:.9rem; line-height:1.7; text-align:center; width:100%; word-break:break-word;}
+.steps div{margin:2px 0;}
+@media (max-width:380px){ .steps{font-size:.8rem;} }
+svg text{font-family:inherit;}
+.answer-row{display:flex; gap:8px; align-items:center; justify-content:center; margin:16px 0 6px; flex-wrap:wrap;}
+.answer-row input{width:64px; text-align:center; font-size:1.05rem; padding:8px 4px; border-radius:10px; border:1px solid var(--border); background:var(--bg); color:var(--text);}
+.sep{font-size:1.3rem; color:var(--muted);}
+.hint{text-align:center; font-size:.76rem; color:var(--muted); margin-bottom:10px;}
+.btn{display:block; width:100%; padding:13px; border:none; border-radius:12px; background:var(--primary); color:#fff; font-size:1rem; font-weight:600; cursor:pointer;}
+.btn:active{background:var(--primary-d);}
+.btn.secondary{background:transparent; color:var(--primary); border:1px solid var(--primary); margin-top:8px;}
+.feedback{text-align:center; font-weight:600; margin:10px 0; min-height:24px;}
+.feedback.good{color:var(--good);} .feedback.bad{color:var(--bad);}
+.hidden{display:none !important;}
+.result-emoji{font-size:2.6rem; text-align:center;}
+.result-score{text-align:center; font-size:1.3rem; font-weight:700; margin:6px 0 16px;}
+.result-topic{text-align:center; font-size:.85rem; color:var(--muted); margin-bottom:10px;}
+</style>
+</head>
+<body>
+<div class="bg-scene" aria-hidden="true">
+  <div class="sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <div class="hill hill-back"></div>
+  <div class="hill hill-front"></div>
+  <span class="leaf l1">🍃</span><span class="leaf l2">🍂</span><span class="leaf l3">🍃</span>
+  <span class="leaf l4">🍂</span><span class="leaf l5">🍃</span>
+</div>
+<div class="wrap">
+  <h1>🚀 Petualangan Matematika</h1>
+  <div class="sub">Bilangan bulat, pecahan, perkalian, geometri &amp; rasio</div>
+
+  <div id="screen-start" class="card">
+    <div class="levels">
+      <button class="lvl-btn" data-t="wb"><b>🔢 Bilangan Bulat</b><span>Operasi + − × ÷</span></button>
+      <button class="lvl-btn" data-t="frac"><b>🍕 Pecahan &amp; Campuran</b><span>Sederhanakan &amp; ubah bentuk</span></button>
+      <button class="lvl-btn" data-t="mul"><b>✖️ Perkalian</b><span>Bulat, pecahan, campuran</span></button>
+      <button class="lvl-btn" data-t="word"><b>📖 Soal Cerita Pecahan</b><span>Masalah sehari-hari</span></button>
+      <button class="lvl-btn" data-t="tri"><b>📐 Luas Segitiga</b><span>Alas × tinggi ÷ 2</span></button>
+      <button class="lvl-btn" data-t="ratio"><b>⚖️ Rasio/Perbandingan</b><span>Sederhanakan &amp; hitung</span></button>
+      <button class="lvl-btn" data-t="vol"><b>📦 Volume Kubus &amp; Balok</b><span>Bangun ruang</span></button>
+      <button class="mix-btn" id="mixBtn">🎲 Mode Campuran (semua topik)</button>
+    </div>
+  </div>
+
+  <div id="screen-game" class="card hidden">
+    <div class="hud">
+      <span id="qCounter">Soal 1/8</span>
+      <span id="scoreLabel">Skor: 0</span>
+      <span class="hearts" id="hearts">❤️❤️❤️</span>
+    </div>
+    <div class="progress"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+    <div class="question" id="qText"></div>
+    <div class="visual" id="visual"></div>
+    <div class="answer-row" id="answerRow"></div>
+    <div class="hint" id="hint"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn" id="checkBtn">Cek Jawaban</button>
+    <button class="btn secondary hidden" id="nextBtn">Lanjut →</button>
+  </div>
+
+  <div id="screen-result" class="card hidden">
+    <div class="result-emoji" id="resEmoji">🎉</div>
+    <div class="result-score" id="resScore"></div>
+    <button class="btn" id="againBtn">Main Lagi</button>
+    <button class="btn secondary" id="homeBtn">Pilih Topik Lain</button>
+  </div>
+</div>
+
+<script>
+const TOTAL_Q = 8;
+const TOPICS = ['wb','frac','mul','word','tri','ratio','vol'];
+let state = {};
+
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a||1;}
+function simplify(n,d){const g=gcd(n,d); return [n/g, d/g];}
+function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+
+function barHTML(den,shaded){
+  let s='<div class="bar">';
+  for(let i=0;i<den;i++) s+=`<div class="seg${i<shaded?' on':''}"></div>`;
+  return s+'</div>';
+}
+function drawRepeated(whole,num,den){
+  let row='<div class="bar-row">';
+  for(let i=0;i<whole;i++) row+=barHTML(den,num);
+  return row+'</div>';
+}
+function drawWholeRemainder(num,den){
+  const whole=Math.floor(num/den), rem=num%den;
+  let row='<div class="bar-row">';
+  for(let i=0;i<whole;i++) row+=barHTML(den,den);
+  if(rem>0) row+=barHTML(den,rem);
+  if(whole===0&&rem===0) row+=barHTML(den,0);
+  return row+'</div>';
+}
+function drawAreaOverlap(numA,denA,numB,denB){
+  let grid=`<div class="grid-model" style="grid-template-columns:repeat(${denB},20px)">`;
+  for(let r=0;r<denA;r++) for(let c=0;c<denB;c++){
+    const inA=r<numA, inB=c<numB;
+    let cls='cell'; if(inA&&inB) cls+=' ab'; else if(inA) cls+=' a'; else if(inB) cls+=' b';
+    grid+=`<div class="${cls}"></div>`;
+  }
+  return grid+'</div>';
+}
+function drawWholeGrid(a,b){
+  const rows=Math.min(a,12), cols=Math.min(b,12);
+  let grid=`<div class="grid-model" style="grid-template-columns:repeat(${cols},20px)">`;
+  for(let i=0;i<rows*cols;i++) grid+='<div class="cell ab"></div>';
+  return grid+'</div>';
+}
+function drawTriangle(base,height){
+  const scale=Math.min(140/base,90/height,9);
+  const w=base*scale,h=height*scale;
+  return `<svg viewBox="0 0 ${w+60} ${h+50}" width="240" height="170">
+    <polygon points="20,${h+20} ${20+w},${h+20} ${20+w*0.3},20" fill="var(--cellAB)" stroke="var(--text)" stroke-width="2"/>
+    <line x1="${20+w*0.3}" y1="20" x2="${20+w*0.3}" y2="${h+20}" stroke="var(--accent)" stroke-dasharray="4" stroke-width="2"/>
+    <text x="${20+w/2}" y="${h+40}" font-size="13" fill="var(--text)" text-anchor="middle">alas = ${base} cm</text>
+    <text x="${20+w*0.3+8}" y="${h/2+20}" font-size="13" fill="var(--text)">tinggi = ${height} cm</text>
+  </svg>`;
+}
+function drawCuboid(p,l,t){
+  return `<svg viewBox="0 0 200 150" width="220" height="160">
+    <polygon points="40,110 120,110 140,90 60,90" fill="var(--cellB)" stroke="var(--text)" stroke-width="2"/>
+    <polygon points="40,110 40,50 60,30 60,90" fill="var(--cellA)" stroke="var(--text)" stroke-width="2"/>
+    <polygon points="40,50 120,50 140,30 60,30" fill="var(--cellAB)" stroke="var(--text)" stroke-width="2"/>
+    <line x1="120" y1="50" x2="120" y2="110" stroke="var(--text)" stroke-width="2"/>
+    <line x1="120" y1="50" x2="140" y2="30" stroke="var(--text)" stroke-width="2"/>
+    <line x1="140" y1="30" x2="140" y2="90" stroke="var(--text)" stroke-width="2"/>
+    <line x1="140" y1="90" x2="120" y2="110" stroke="var(--text)" stroke-width="2"/>
+    <text x="80" y="128" font-size="12" fill="var(--text)" text-anchor="middle">p=${p}</text>
+    <text x="18" y="80" font-size="12" fill="var(--text)">t=${t}</text>
+    <text x="150" y="65" font-size="12" fill="var(--text)">l=${l}</text>
+  </svg>`;
+}
+
+function genWhole(){
+  const ops=['+','-','×','÷']; const op=ops[randInt(0,3)];
+  let a,b,ans;
+  if(op==='+'){a=randInt(15,250);b=randInt(15,250);ans=a+b;}
+  else if(op==='-'){a=randInt(30,300);b=randInt(1,a);ans=a-b;}
+  else if(op==='×'){a=randInt(2,25);b=randInt(2,15);ans=a*b;}
+  else {b=randInt(2,12);ans=randInt(2,20);a=b*ans;}
+  return {prompt:`${a} ${op} ${b} = ... ?`, answerType:'int', correct:{num:ans,den:1}, visual:null};
+}
+
+function genFracBasic(){
+  const sub=randInt(1,3);
+  if(sub===1){
+    const den=randInt(2,10), num=randInt(1,den-1), k=randInt(2,4);
+    const uNum=num*k, uDen=den*k; const [sn,sd]=simplify(uNum,uDen);
+    return {prompt:`Sederhanakan: ${uNum}/${uDen} = ... ?`, answerType:'frac', correct:{num:sn,den:sd}, visual:{f:'bar', num:uNum, den:uDen}};
+  } else if(sub===2){
+    const den=randInt(2,8), whole=randInt(1,4), fnum=randInt(1,den-1), num=whole*den+fnum;
+    return {prompt:`Ubah ke bilangan campuran: ${num}/${den} = ... ?`, answerType:'mixed', correct:{num,den}, visual:{f:'bar', num, den}};
+  } else {
+    const den=randInt(2,8), whole=randInt(1,4), fnum=randInt(1,den-1), num=whole*den+fnum;
+    return {prompt:`Ubah ke pecahan biasa: ${whole} ${fnum}/${den} = ... ?`, answerType:'frac', correct:{num,den}, visual:{f:'bar', num, den}};
+  }
+}
+
+function genMul(){
+  const level=randInt(1,4);
+  function frac(maxDen){const den=randInt(2,maxDen);return {num:randInt(1,den-1),den};}
+  let a,b;
+  if(level===1){ a={num:randInt(2,12),den:1}; b={num:randInt(2,12),den:1}; }
+  else if(level===2){ const whole=randInt(2,6), f=frac(6); if(Math.random()<0.5){a={num:whole,den:1};b=f;} else {a=f;b={num:whole,den:1};} }
+  else if(level===3){ a=frac(6); b=frac(6); }
+  else { const whole=randInt(1,4), f=frac(5); a={num:whole*f.den+f.num, den:f.den, whole, fracNum:f.num}; b=Math.random()<0.5?{num:randInt(2,6),den:1}:frac(5); }
+  const cn=a.num*b.num, cd=a.den*b.den; const [sn,sd]=simplify(cn,cd);
+  const aLbl = a.whole!==undefined?`${a.whole} ${a.fracNum}/${a.den}`:(a.den===1?`${a.num}`:`${a.num}/${a.den}`);
+  const bLbl = b.den===1?`${b.num}`:`${b.num}/${b.den}`;
+  return {prompt:`${aLbl}  ×  ${bLbl}  =  ... ?`, answerType: sd===1?'int':'frac', correct:{num:sn,den:sd}, visual:{f:'mul', level, a, b}};
+}
+
+function genWord(){
+  const type=randInt(1,3);
+  if(type===1){
+    const b=randInt(2,6), a=randInt(1,b-1), d=randInt(2,6), c=randInt(1,d-1);
+    const [sn,sd]=simplify(a*c,b*d);
+    return {prompt:`Ibu punya ${a}/${b} kg gula. Dipakai ${c}/${d} bagian untuk kue. Berapa kg gula yang dipakai?`, answerType:'frac', correct:{num:sn,den:sd}, visual:null};
+  } else if(type===2){
+    const n=randInt(2,8), d=randInt(2,6), c=randInt(1,d-1);
+    const [sn,sd]=simplify(n*c,d);
+    return {prompt:`Ayah punya ${n} liter minyak. Dipakai ${c}/${d} bagian untuk memasak. Berapa liter yang dipakai?`, answerType:'frac', correct:{num:sn,den:sd}, visual:null};
+  } else {
+    const b=randInt(2,6), a=randInt(1,b-1), n=randInt(2,5);
+    const [sn,sd]=simplify(a,b*n);
+    return {prompt:`Tali sepanjang ${a}/${b} meter dipotong sama panjang menjadi ${n} bagian. Berapa panjang tiap bagian (meter)?`, answerType:'frac', correct:{num:sn,den:sd}, visual:null};
+  }
+}
+
+function genTriangle(){
+  const base=randInt(4,20), height=randInt(3,16);
+  const [sn,sd]=simplify(base*height,2);
+  return {prompt:`Luas segitiga dengan alas ${base} cm dan tinggi ${height} cm = ... cm²?`, answerType: sd===1?'int':'frac', correct:{num:sn,den:sd}, visual:{f:'tri', base, height}};
+}
+
+function genRatio(){
+  let p=randInt(1,6), q=randInt(1,6);
+  while(gcd(p,q)!==1) {p=randInt(1,6); q=randInt(1,6);}
+  const g=randInt(2,6);
+  if(Math.random()<0.5){
+    return {prompt:`Sederhanakan perbandingan ${p*g} : ${q*g}`, answerType:'ratio', correct:{num:p,den:q}, visual:null};
+  } else {
+    const totalA=p*g;
+    return {prompt:`Perbandingan kelereng Andi : Budi = ${p} : ${q}. Kelereng Andi ada ${totalA}. Berapa kelereng Budi?`, answerType:'int', correct:{num:q*g,den:1}, visual:null};
+  }
+}
+
+function genVolume(){
+  if(Math.random()<0.5){
+    const s=randInt(2,10);
+    return {prompt:`Volume kubus dengan sisi ${s} cm = ... cm³?`, answerType:'int', correct:{num:s*s*s,den:1}, visual:{f:'cub', p:s,l:s,t:s}};
+  } else {
+    const p=randInt(2,12), l=randInt(2,10), t=randInt(2,8);
+    return {prompt:`Volume balok panjang ${p} cm, lebar ${l} cm, tinggi ${t} cm = ... cm³?`, answerType:'int', correct:{num:p*l*t,den:1}, visual:{f:'cub', p,l,t}};
+  }
+}
+
+function genQuestion(topic){
+  switch(topic){
+    case 'wb': return genWhole();
+    case 'frac': return genFracBasic();
+    case 'mul': return genMul();
+    case 'word': return genWord();
+    case 'tri': return genTriangle();
+    case 'ratio': return genRatio();
+    case 'vol': return genVolume();
+  }
+}
+
+function buildVisual(q){
+  const el=document.getElementById('visual'); el.innerHTML='';
+  const v=q.visual; if(!v) return;
+  if(v.f==='bar'){ el.innerHTML = drawWholeRemainder(v.num, v.den); }
+  else if(v.f==='tri'){ el.innerHTML = drawTriangle(v.base, v.height); }
+  else if(v.f==='cub'){ el.innerHTML = drawCuboid(v.p, v.l, v.t); }
+  else if(v.f==='mul'){
+    const {level,a,b}=v;
+    if(level===1) el.innerHTML=drawWholeGrid(a.num,b.num);
+    else if(level===2){ const whole=a.den===1?a.num:b.num; const f=a.den===1?b:a; el.innerHTML=drawRepeated(whole,f.num,f.den); }
+    else if(level===3) el.innerHTML=drawAreaOverlap(a.num,a.den,b.num,b.den);
+    else {
+      const mixed=a.whole!==undefined?a:b, other=a.whole!==undefined?b:a;
+      const oLbl = other.den===1?`${other.num}`:`${other.num}/${other.den}`;
+      el.innerHTML=`<div class="steps">
+        <div>${mixed.whole} ${mixed.fracNum}/${mixed.den} = ${mixed.num}/${mixed.den}</div>
+        <div>${mixed.num}/${mixed.den} × ${oLbl}</div>
+        <div>= (${mixed.num}×${other.num}) / (${mixed.den}×${other.den})</div>
+        <div>= ${mixed.num*other.num}/${mixed.den*other.den}</div></div>`;
+    }
+  }
+}
+
+function buildAnswerInputs(q){
+  const row=document.getElementById('answerRow'); row.innerHTML='';
+  const hint=document.getElementById('hint');
+  if(q.answerType==='int'){
+    row.innerHTML='<input type="number" id="ansNum" placeholder="jawaban">';
+    hint.textContent='Masukkan jawaban berupa bilangan bulat.';
+  } else if(q.answerType==='frac'){
+    row.innerHTML='<input type="number" id="ansNum" placeholder="pembilang"><span class="sep">/</span><input type="number" id="ansDen" placeholder="penyebut">';
+    hint.textContent='Masukkan sebagai pecahan (boleh belum disederhanakan).';
+  } else if(q.answerType==='ratio'){
+    row.innerHTML='<input type="number" id="ansNum" placeholder="a"><span class="sep">:</span><input type="number" id="ansDen" placeholder="b">';
+    hint.textContent='Masukkan perbandingan paling sederhana.';
+  } else if(q.answerType==='mixed'){
+    row.innerHTML='<input type="number" id="ansWhole" placeholder="bulat"><input type="number" id="ansNum" placeholder="pembilang"><span class="sep">/</span><input type="number" id="ansDen" placeholder="penyebut">';
+    hint.textContent='Masukkan sebagai bilangan campuran: bulat, lalu pecahan.';
+  }
+}
+
+function correctLabel(q){
+  const {num,den}=q.correct;
+  if(q.answerType==='int') return `${num}`;
+  if(q.answerType==='ratio') return `${num} : ${den}`;
+  if(q.answerType==='mixed'){ const whole=Math.floor(num/den), rem=num%den; return rem===0?`${whole}`:`${whole} ${rem}/${den}`; }
+  return `${num}/${den}`;
+}
+
+function spawnConfetti(container, count){
+  const emojis=['🎉','⭐','✨','🎊'];
+  for(let i=0;i<count;i++){
+    const s=document.createElement('span');
+    s.className='confetti-piece';
+    s.textContent=emojis[randInt(0,emojis.length-1)];
+    s.style.left=randInt(5,90)+'%';
+    s.style.animationDelay=(Math.random()*0.2)+'s';
+    container.appendChild(s);
+    setTimeout(()=>s.remove(),1300);
+  }
+}
+function showPlusFloat(container){
+  const s=document.createElement('span');
+  s.className='plus-float'; s.textContent='+10';
+  s.style.top='6px';
+  container.appendChild(s);
+  setTimeout(()=>s.remove(),800);
+}
+
+function startSession(topicPick){
+  state={mode:topicPick, idx:0, score:0, lives:3, current:null};
+  document.getElementById('screen-start').classList.add('hidden');
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-game').classList.remove('hidden');
+  nextQuestion();
+}
+
+function nextQuestion(){
+  document.getElementById('feedback').textContent=''; document.getElementById('feedback').className='feedback';
+  document.getElementById('checkBtn').classList.remove('hidden');
+  document.getElementById('nextBtn').classList.add('hidden');
+  if(state.idx>=TOTAL_Q) return finishSession();
+  const topic = state.mode==='mix'? TOPICS[randInt(0,TOPICS.length-1)] : state.mode;
+  state.current = genQuestion(topic);
+  const qEl=document.getElementById('qText');
+  qEl.textContent = state.current.prompt;
+  qEl.classList.remove('q-anim'); void qEl.offsetWidth; qEl.classList.add('q-anim');
+  buildVisual(state.current);
+  buildAnswerInputs(state.current);
+  document.getElementById('qCounter').textContent=`Soal ${state.idx+1}/${TOTAL_Q}`;
+  document.getElementById('scoreLabel').textContent=`Skor: ${state.score}`;
+  document.getElementById('hearts').textContent='❤️'.repeat(state.lives)+'🖤'.repeat(3-state.lives);
+  document.getElementById('progFill').style.width=(state.idx/TOTAL_Q*100)+'%';
+}
+
+function checkAnswer(){
+  const q=state.current; const fb=document.getElementById('feedback');
+  let userNum, userDen=1;
+  if(q.answerType==='int'){
+    userNum=parseInt(document.getElementById('ansNum').value,10);
+    if(isNaN(userNum)){ fb.textContent='Isi jawabannya dulu ya 🙂'; return; }
+  } else if(q.answerType==='mixed'){
+    const w=parseInt(document.getElementById('ansWhole').value,10)||0;
+    const n=parseInt(document.getElementById('ansNum').value,10);
+    const d=parseInt(document.getElementById('ansDen').value,10);
+    if(isNaN(n)||isNaN(d)||d===0){ fb.textContent='Isi jawabannya dulu ya 🙂'; return; }
+    userNum=w*d+n; userDen=d;
+  } else {
+    userNum=parseInt(document.getElementById('ansNum').value,10);
+    userDen=parseInt(document.getElementById('ansDen').value,10);
+    if(isNaN(userNum)||isNaN(userDen)||userDen===0){ fb.textContent='Isi jawabannya dulu ya 🙂'; return; }
+  }
+  const isCorrect = userNum*q.correct.den === q.correct.num*userDen;
+  const gameCard = document.getElementById('screen-game');
+  if(isCorrect){
+    state.score+=10; fb.textContent='✅ Benar! Mantap!'; fb.className='feedback good';
+    spawnConfetti(gameCard, 8); showPlusFloat(gameCard);
+  } else {
+    state.lives-=1; fb.textContent=`❌ Belum tepat. Jawaban: ${correctLabel(q)}`; fb.className='feedback bad';
+    gameCard.classList.remove('shake'); void gameCard.offsetWidth; gameCard.classList.add('shake');
+  }
+  const heartsEl=document.getElementById('hearts');
+  heartsEl.textContent='❤️'.repeat(Math.max(state.lives,0))+'🖤'.repeat(3-Math.max(state.lives,0));
+  heartsEl.classList.remove('pulse'); void heartsEl.offsetWidth; heartsEl.classList.add('pulse');
+  document.getElementById('scoreLabel').textContent=`Skor: ${state.score}`;
+  document.getElementById('checkBtn').classList.add('hidden');
+  document.getElementById('nextBtn').classList.remove('hidden');
+  state.idx+=1;
+  document.getElementById('nextBtn').textContent = state.lives<=0 ? 'Lihat Hasil →' : 'Lanjut →';
+}
+
+function finishSession(){
+  document.getElementById('screen-game').classList.add('hidden');
+  document.getElementById('screen-result').classList.remove('hidden');
+  const pct=state.score/(TOTAL_Q*10);
+  document.getElementById('resEmoji').textContent = pct>=0.8?'🏆':pct>=0.5?'🎉':'💪';
+  document.getElementById('resScore').textContent = `Skor akhir: ${state.score} / ${TOTAL_Q*10}`;
+  if(pct>=0.8) spawnConfetti(document.getElementById('screen-result'), 20);
+}
+
+document.querySelectorAll('.lvl-btn').forEach(b=> b.addEventListener('click', ()=>startSession(b.dataset.t)));
+document.getElementById('mixBtn').addEventListener('click', ()=>startSession('mix'));
+document.getElementById('checkBtn').addEventListener('click', checkAnswer);
+document.getElementById('nextBtn').addEventListener('click', ()=>{ if(state.lives<=0) finishSession(); else nextQuestion(); });
+document.getElementById('againBtn').addEventListener('click', ()=>startSession(state.mode));
+document.getElementById('homeBtn').addEventListener('click', ()=>{
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-start').classList.remove('hidden');
+});
+</script>
+</body>
+</html>
